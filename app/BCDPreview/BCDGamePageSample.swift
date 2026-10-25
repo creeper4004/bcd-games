@@ -93,6 +93,8 @@ import SwiftUI
                        note: "Direct3D 11 and 12 games draw at the resolution above, and Apple's MetalFX enlarges the picture by this much."),
                 toggle("framegen", "Frame generation (experimental)",
                        note: "MetalFX makes up a frame between every two the game draws: twice the frames, for GPU time and a little delay."),
+                toggle("auto-hdr", "Auto HDR (experimental)",
+                       note: "Brighter highlights in Direct3D 9, 10 and 11 games on HDR displays. Menus and HUDs may brighten too. Adjusts to the screen's available brightness. Restart the game after changing it."),
             ], headline: resolution.value.replacingOccurrences(of: "x", with: " × ") + " · " + (fps.choices.first { $0.value == fps.value }?.label ?? "")),
             BCDGameSettingGroup(id: "direct3d", title: "Direct3D", symbol: "cube.transparent", settings: [
                 choice("anisotropy", "Direct3D 9 texture filtering", "0", [("0", "The game's choice"), ("2", "Up to 2×"), ("4", "Up to 4×"), ("8", "Up to 8×")]),
