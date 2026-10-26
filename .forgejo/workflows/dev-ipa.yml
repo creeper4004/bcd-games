@@ -17,6 +17,8 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Check color profiles
+        run: python3 tests/host/check-bcd-themes.py
       - name: Build local test IPA
         shell: bash
         run: caffeinate -i python3 tools/build-dev-ipa.py --output "$GITHUB_WORKSPACE/output"
