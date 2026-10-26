@@ -1,0 +1,28 @@
+name: BCD development IPA
+on:
+  push:
+    branches: [main, 'experiment/**', 'dev/**']
+  workflow_dispatch:
+concurrency:
+  group: bcd-dev-ipa
+  cancel-in-progress: true
+jobs:
+  ipa:
+    if: github.repository == 'creeper/bcd-games'
+    runs-on: bcd-macos-arm64
+    timeout-minutes: 120
+    steps:
+      - name: Verify local Xcode worker
+        shell: bash
+        run: |
+          mkdir -p output
+          uname -sm > output/smoke.txt
+          xcodebuild -version >> output/smoke.txt
+          date -u >> output/smoke.txt
+      - name: Store local build artifact
+        uses: https://github.com/actions/upload-artifact@v3
+        with:
+          name: bcd-macos-smoke-${{ github.run_number }}
+          path: output/smoke.txt
+          retention-days: 7
+          if-no-files-found: error
