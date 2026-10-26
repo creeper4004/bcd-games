@@ -1,0 +1,9 @@
+{
+  "release": "v0.1.611",
+  "commit": "169a939c9d1b7879a29bfb3934d4d255d718c722",
+  "ipa_sha256": "55da80eabafc522a465808cbf8cdfb4f57d1455f243cfcd85b308c5315249ecc",
+  "submodules": {
+    "wine": "469e08af66c2638b74422e3d068620d400272d55",
+    "FEX": "959ac0616918ae1afe98f57d5daaabb07bb196f0"
+  }
+}
