@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Additional permission: Madeira Converter Exception, version 1; see LICENSE-EXCEPTION.md.
 """Use the public Metal atomic API; Xcode 27 changed a private intrinsic.
 
 Run before generating air_tessellation.h. The pointer, relaxed ordering and

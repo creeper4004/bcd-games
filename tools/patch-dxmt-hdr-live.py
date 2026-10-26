@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Additional permission: Madeira Converter Exception, version 1; see LICENSE-EXCEPTION.md.
 """Live SDR/HDR comparison, calibration pattern and tagged drawable measurements.
 
 Apply after patch-dxmt-auto-hdr.py. --presenter-dir patches the private ARM64EC
