@@ -59,6 +59,10 @@ OVERLAY = {
                 "kind": "text", "default": "2", "sources": ["tools/patch-dxmt-auto-hdr.py"],
                 "note": "Peak relative to SDR white (1–8, default 2). 1 keeps SDR brightness in a linear EDR layer. "
                         "Limited to the display's current headroom; invalid values use 2. Requires Auto HDR; restart the game."},
+    "env.DXMT_AUTO_HDR_PATTERN": {"category": "Direct3D 9/10/11 (DXMT)", "title": "Auto HDR startup calibration",
+                "kind": "text", "default": "0", "sources": ["app/Madeira/BCDHDR.m"],
+                "note": "Off (0), or reference bands for 10 or 30 seconds at the first supported DXMT frames. "
+                        "Returns to gameplay automatically. Requires Auto HDR; restart the game."},
     "env.MADEIRA_PIN_GRAPHICS_DLLS": {"category": "Memory & JIT pool", "title": "Keep graphics DLLs loaded",
                 "kind": "bool", "default": "0",
                 "note": "Default off. On a D3D12 device/probe call, pins already loaded D3D12, DXGI and Wine Metal "

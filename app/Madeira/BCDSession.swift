@@ -187,7 +187,6 @@ enum BCDSessionCommand: Equatable {
     @Published var menu: BCDSessionMenuModel?
     /// The performance HUD (BCDHUDView.swift); nil while the player has it off.
     @Published var performance: BCDHUDFeed?
-    @Published var hdr: BCDHDRFeed?
     @Published var log: BCDLogFeed?
     /// The session line ("Starting…", "The game was asked to close…").
     @Published var message = ""
@@ -246,12 +245,7 @@ struct BCDSessionLayer: View {
                         .padding(.top, insets.top + 12)
                         .allowsHitTesting(false)
                 }
-                if hud.starting == nil, let hdr = hud.hdr {
-                    BCDHDRSignalView(feed: hdr)
-                        .frame(maxWidth: 430).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                        .padding(.horizontal, insets.leading + 60).padding(.bottom, insets.bottom + 12)
-                        .allowsHitTesting(false)
-                }
+
                 if hud.starting == nil && hud.showsMenuButton {
                     // The top right corner, at the screen's own edge (owner, 2026-10-19: it sat on the
                     // touch controls' RT). See BCDDraggable's `edge`.

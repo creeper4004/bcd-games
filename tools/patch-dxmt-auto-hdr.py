@@ -54,32 +54,21 @@ SELECT = r'''  // Only SDR 8-bit swapchains. Native PQ/scRGB and float buffers b
 '''
 
 HEADROOM = r'''#if TARGET_OS_IOS
-#include <math.h>
-/* madeira-bcd: auto HDR. Resolve the screen from the layer's owning view,
- * including per-window compositor sublayers. UIKit access is main-thread only.
- * Detached layers and unavailable displays safely report SDR. */
+/* madeira-bcd: auto HDR. Main-thread screen reads are asynchronous and cached
+ * by app/Madeira/BCDHDR.m. This native query never waits for UIKit. */
+extern void bcd_hdr_get_headroom(uint64_t layer, float *current, float *potential);
 static struct WMTEDRValue madeira_ios_edr(CAMetalLayer *layer) {
-  __block struct WMTEDRValue result = {1.0, 1.0};
+  struct WMTEDRValue result = {1.0, 1.0};
   const char *enabled = getenv("DXMT_AUTO_HDR");
   if (!enabled || strcmp(enabled, "1")) return result;
-  execute_on_main(^{
-    UIScreen *screen = nil;
-    for (CALayer *ancestor = layer; ancestor; ancestor = ancestor.superlayer) {
-      if ([ancestor.delegate isKindOfClass:UIView.class]) {
-        screen = ((UIView *)ancestor.delegate).window.windowScene.screen;
-        if (screen) break;
-      }
-    }
-    if (screen) {
-      result.maximum_edr_color_component_value = fmax(1.0, screen.currentEDRHeadroom);
-      result.maximum_potential_edr_color_component_value = fmax(1.0, screen.potentialEDRHeadroom);
-    }
-  });
+  bcd_hdr_get_headroom((uint64_t)(uintptr_t)layer,
+      &result.maximum_edr_color_component_value, &result.maximum_potential_edr_color_component_value);
   return result;
 }
 #endif
 
 '''
+
 
 
 def replacements(core, native):
@@ -121,7 +110,7 @@ def main():
     pending = {}
     for path, changes in replacements(core, native).items():
         source = path.read_text()
-        if MARKER in source:
+        if MARKER in source or "madeira-bcd: HDR live v2" in source:
             print(f"{path.name}: auto HDR already patched")
             continue
         for old, new in changes:

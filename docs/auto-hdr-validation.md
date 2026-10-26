@@ -10,16 +10,16 @@ missing native HDR information.
 1. Enable **Auto HDR (experimental)** in the game's Display settings before
    launching it. Use the updated DXMT Direct3D 9/11 renderer. The live controls
    are unavailable for a session started without Auto HDR, or for Direct3D 12.
-2. Open the in-game menu → **Display → HDR comparison & validation**.
-3. Turn on **Measure the game's HDR signal**, then resume. The small readout
-   samples the game's own output texture, before BCD's menus/touch controls.
-4. In a bright scene, switch **HDR view** off/on and resume each time. Off is
-   the SDR reference, limited to 1× SDR white. The same float/EDR layer remains
-   active so the comparison does not change the layer's SDR-white reference.
-5. Use **Show HDR test pattern** to replace gameplay temporarily with five
-   gray bands: 0.18×, 1×, 1.25×, 1.5×, 2× SDR white. The available headroom
-   limits the upper bands; SDR view clips them to 1×. Turn the pattern off
-   before measuring gameplay again.
+2. Choose **Performance HUD → 4**. HDR output appears as one Report entry;
+   sampling follows that layout automatically. A Custom HUD can include it too.
+3. In a bright scene, use **Display → Auto HDR comparison → SDR/HDR**, then
+   resume. Both use the same float/EDR layer so SDR white stays stable.
+4. For reference bands, open **Game → Options → Display → HDR calibration
+   (advanced)** before launch. Choose a 10- or 30-second startup pattern; it
+   returns to gameplay automatically. Keep it Off for gameplay recordings.
+
+See [Recording Auto HDR evidence](auto-hdr-recording.md) for a short test plan
+and the `[hdr-evidence]` records in each game's existing log.
 
 **Game frame contains an HDR signal** requires measured finite pixels above
 1× SDR white, an RGBA16Float drawable, extended-linear-sRGB color space, EDR
@@ -33,9 +33,8 @@ small highlights between the sample points. Headroom changes with the display
 and operating conditions. Screenshots or an SDR preview are not a measurement
 of the physical display's HDR output.
 
-Controls last for this session. Resume the game to apply a change and acquire a
-new measurement; every change invalidates earlier in-flight results. Turn off
-measurement to remove the readout and the extra GPU sampling work. Diagnostic
+Live comparison lasts for this session; calibration settings are saved per game. Resume the game to apply a change and acquire a
+new measurement; every change invalidates earlier in-flight results. Choose a HUD without the HDR item to stop the extra GPU sampling work. Diagnostic
 lines use the `[hdr-signal]` prefix in the session log.
 
 ## Host validation
