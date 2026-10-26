@@ -70,10 +70,7 @@ struct BCDSessionLiveLayer: View {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.refresh() }
             .store(in: &watchers)
-        NotificationCenter.default.publisher(for: BCDHDRLive.changed)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.refreshHDR() }
-            .store(in: &watchers)
+
     }
 
     func appeared() {
@@ -91,7 +88,6 @@ struct BCDSessionLiveLayer: View {
     // MARK: What is on screen
 
     private func refresh() {
-        refreshHDR()
         let running = model.current != nil
         hud.message = running ? model.sessionMessage : ""
         hud.showsMenuButton = running && !model.launching
@@ -100,12 +96,6 @@ struct BCDSessionLiveLayer: View {
         if running && !model.launching && BCDHUDState.shared.setup.layout.shown { startOverlay() } else { stopOverlay() }
         if running && !model.launching && model.liveLogs { startLog() } else { stopLog() }
         tickStarting()
-    }
-
-    private func refreshHDR() {
-        let reading = BCDHDRLive.reading()
-        guard model.current != nil, reading.measuring else { hud.hdr = nil; return }
-        if let feed = hud.hdr { feed.reading = reading } else { hud.hdr = BCDHDRFeed(reading) }
     }
 
     // MARK: Starting screen
@@ -648,7 +638,6 @@ struct BCDSessionLiveLayer: View {
     }
 
     func toggle(_ row: String, _ on: Bool) {
-        if BCDHDRLive.toggle(row, on) { return }
         if BCDMenuMore.handles(row) { return BCDMenuMore.toggle(row, on) { [weak self] in self?.menu?.changed() } }   // madeira-bcd (round 604)
         if BCDInputMenu.handles(row) { return BCDInputMenuLive.change(row, on ? "1" : "0", entry: model.activeEntry) }   // madeira-bcd (2026-10-25, round 604)
         if BCDHUDMenu.owns(row) { return applyHUD(BCDHUDMenu.toggle(row, on, BCDHUDState.shared.setup)) }
@@ -662,6 +651,7 @@ struct BCDSessionLiveLayer: View {
     }
 
     func choose(_ row: String, _ value: String) {
+        if BCDHDRLive.choose(row, value) { return }
         if BCDMenuMore.handles(row) { return BCDMenuMore.choose(row, value) { [weak self] in self?.menu?.changed() } }   // madeira-bcd (round 604)
         if BCDInputMenu.handles(row) { return BCDInputMenuLive.change(row, value, entry: model.activeEntry) }   // madeira-bcd (2026-10-25, round 604)
         if BCDHUDMenu.owns(row) { return applyHUD(BCDHUDMenu.choose(row, value, BCDHUDState.shared.setup, screen: hudScreen)) }
@@ -1314,7 +1304,6 @@ struct BCDDeskSessionMenu: View {
     }
 
     func toggle(_ row: String, _ on: Bool) {
-        if BCDHDRLive.toggle(row, on) { return }
         switch row {
         case "overlay": session.showPerformance = on
         case "eco":
@@ -1325,6 +1314,7 @@ struct BCDDeskSessionMenu: View {
     }
 
     func choose(_ row: String, _ value: String) {
+        if BCDHDRLive.choose(row, value) { return }
         switch row {
         case "fps":
             guard let raw = Int32(value), let next = FrameLimit(rawValue: raw) else { return }

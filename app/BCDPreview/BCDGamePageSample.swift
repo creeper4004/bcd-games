@@ -206,6 +206,10 @@ import SwiftUI
             }
             d.groups.insert(contentsOf: BCDGameSetupPage.sections(setup) + [BCDGameStartPage.group(start)], at: min(3, d.groups.count))
         }
+        if let i = d.groups.firstIndex(where: { $0.id == "display" }) {
+            d.groups[i].settings.append(BCDGameSetting(id: "hdr-calibration", title: "HDR calibration (advanced)", kind: .opens(.section("hdr-calibration"))))
+        }
+        d.groups.append(BCDHDRMenu.calibration(peak: "2", pattern: "0"))
         if !settings { d.groups = [] }
         d.sizeOnDisk = game.size
         d.lastPlayed = game.lastPlayed
@@ -440,7 +444,7 @@ struct BCDGamePreviewRoot: View {
     var body: some View {
         let parts = spec.split(separator: "-").map(String.init)
         let id = parts.count > 1 ? parts[1] : (UserDefaults.standard.string(forKey: "BCDGame") ?? "367520")
-        let what = parts.count > 2 ? parts[2] : ""
+        let what = parts.count > 2 ? parts.dropFirst(2).joined(separator: "-") : ""
         let panel: BCDGameOptionsPage? = switch what {
         case "options": .main
         case "cloud": .cloud
@@ -448,7 +452,7 @@ struct BCDGamePreviewRoot: View {
         case "tuning": .tuning
         case "config": .config
         case "findstore": .storeSearch
-        case "display", "direct3d", "compat", "controls", "launch", "steam", "library", "binds", "dlc", "help", "sound",
+        case "hdr-calibration", "display", "direct3d", "compat", "controls", "launch", "steam", "library", "binds", "dlc", "help", "sound",
              "windows", "components", "fex", "saveplace", "fixes", "desktop", "start": .group(what)   // the last seven: round 604 (BCDGameSetupPage.swift, BCDGameStart.swift)
         case _ where BCDInputPage.groupIDs.contains(what): .group(what)
         case "resolution", "fps", "scaling", "arguments", "installrequest": .setting(what)

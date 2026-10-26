@@ -1906,6 +1906,8 @@ static void *wine_process_thread(void *arg) {
             }
         }
 
+        bcd_hdr_begin(); // session environment is applied; keep the HUD's probe request
+
         // Redirect stderr AND stdout to log file so Wine debug output (WINEDEBUG)
         // and the guest program's printf are both captured.
         {
@@ -3087,7 +3089,7 @@ static void wine_session_end(void)
     unsetenv("FEX_X87REDUCEDPRECISION");   /* ml1184 */
     unsetenv("MADEIRA_DINPUT_PAD");        /* ml1240 */
     unsetenv("MADEIRA_FEX_AVX"); unsetenv("MADEIRA_FRAMEGEN");   /* ml1184 */
-    unsetenv("DXMT_AUTO_HDR"); unsetenv("DXMT_AUTO_HDR_PEAK"); /* Auto HDR belongs to this session. */
+    unsetenv("DXMT_AUTO_HDR"); unsetenv("DXMT_AUTO_HDR_PEAK"); unsetenv("DXMT_AUTO_HDR_PATTERN"); /* Auto HDR belongs to this session. */
     unsetenv("DXMT_ENABLE_NVEXT"); unsetenv("DXMT_WSI_MONITOR_IDENTITY"); unsetenv("DXMT_WSI_MODE_TABLE");
     /* madeira-bcd: Horizon Zero Dawn's per-game switches must not reach a later game
      * of this app run (GTA V Enhanced runs without them). */
