@@ -55,7 +55,7 @@ If the build says that DLL is missing, the prebuilt D3D11 renderer has no Auto H
   White menus and HUD elements brighten too: the final image has no UI mask.
 - The final layer uses RGBA16Float, extended linear sRGB and EDR. There is no extra
   full-screen pass, but the drawable uses more memory/bandwidth than BGRA8, and the
-  shader does more arithmetic. iOS headroom is read on the main thread per present.
+  shader does more arithmetic. iOS headroom is refreshed asynchronously on the main thread at most twice a second per layer; rendering reads a bounded-age cache. Probe preparation runs on a utility queue and its shared buffer is reused after GPU completion.
 - Native game HDR discovery/metadata and BCD's Direct3D 12 presentation are separate
   work. This change does not advertise an HDR Windows monitor or implement D3D12 HDR.
 - Test frame generation and upscaling combinations separately. Screenshots,
@@ -92,6 +92,7 @@ For a complete local IPA build, apply the workflow's full patch sequence, includ
 ```sh
 python3 tools/patch-dxmt-layer-format.py
 python3 tools/patch-dxmt-auto-hdr.py
+python3 tools/patch-dxmt-hdr-live.py
 ```
 
 Then rebuild the relevant DXMT/native libraries and IPA. Changing config alone
