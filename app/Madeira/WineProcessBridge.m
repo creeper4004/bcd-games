@@ -6,6 +6,7 @@
 #import <os/log.h>
 #import <pthread.h>
 #import "WineProcessBridge.h"
+#import "BCDHDR.h"
 /* AVFoundation: AVAudioSession activation for the Tier-2 audio driver
  * (audio_null_ios.c RemoteIO backend). AudioToolbox: pulls the framework
  * in via autolink — the static-lib driver code can't autolink itself. */
@@ -3152,6 +3153,7 @@ static void *wine_process_thread(void *arg) {
 static void wine_session_end(void)
 {
     if (__atomic_exchange_n(&g_session_end_claim, 1, __ATOMIC_ACQ_REL)) return;
+    bcd_hdr_reset();
     g_wine_running = 0;
     wine_progname_restore();
     /* ml1184: these belong to the launch that just ended; a later session in this app

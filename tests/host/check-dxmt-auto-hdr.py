@@ -93,6 +93,12 @@ def main():
         run([sys.executable, PATCH], cwd=tree)
         assert digest(tree) == once, "patch is not idempotent"
         print("ok: patch applies, rejects drift without partial writes, and is idempotent")
+        live = ROOT / "tools/patch-dxmt-hdr-live.py"
+        run([sys.executable, live], cwd=tree)
+        once = digest(tree)
+        run([sys.executable, live], cwd=tree)
+        assert digest(tree) == once, "live patch is not idempotent"
+        print("ok: live HDR patch applies and is idempotent")
         check_presenter(tree, core)
         if not shutil.which("xcrun"):
             print("SKIP: Xcode shader/bridge checks (not on macOS)")
@@ -119,6 +125,18 @@ def main():
         exe = tree / "gpu-check"
         run(["swiftc", ROOT / "tests/host/auto_hdr_gpu.swift", "-o", exe])
         print(run([exe, tree / "macosx.metallib"]).strip())
+        probe = tree / "probe-check"
+        run(["xcrun", "clang", "-fobjc-arc", "-fblocks", f"-I{ROOT / 'app/Madeira'}",
+             ROOT / "app/Madeira/BCDHDR.m", ROOT / "tests/host/auto_hdr_probe.m",
+             "-framework", "Foundation", "-framework", "Metal", "-framework", "QuartzCore",
+             "-framework", "AppKit", "-o", probe])
+        print(run([probe]).strip())
+        reading = (ROOT / "app/Madeira/BCDHDRMenu.swift").read_text()
+        reading = reading.split("enum BCDHDRMenu")[0].replace("import SwiftUI", "import Foundation")
+        source = tree / "main.swift"
+        source.write_text(reading + (ROOT / "tests/host/auto_hdr_reading.swift").read_text())
+        run(["swiftc", source, "-o", tree / "reading-check"])
+        print(run([tree / "reading-check"]).strip())
     print("PASS: DXMT Auto HDR")
 
 

@@ -11,7 +11,7 @@ let library = try device.makeLibrary(URL: URL(fileURLWithPath: CommandLine.argum
 let queue = device.makeCommandQueue()!
 
 func render(_ pixels: [SIMD4<Float>], peak: Float, srgb: Bool = false,
-            scaled: Bool = false, gamma: Bool = false) throws -> [Float] {
+            scaled: Bool = false, gamma: Bool = false, flags: UInt32 = 0) throws -> [Float] {
     let sourceFormat: MTLPixelFormat = srgb ? .rgba8Unorm_srgb : .rgba32Float
     let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: sourceFormat,
         width: pixels.count, height: 1, mipmapped: false)
@@ -60,8 +60,8 @@ func render(_ pixels: [SIMD4<Float>], peak: Float, srgb: Bool = false,
             mipmapLevel: 0, withBytes: $0.baseAddress!, bytesPerRow: 1024 * 16) }
         encoder.setFragmentTexture(lut, index: 1)
     }
-    // Four consecutive float fields, matching DXMTPresentMetadata on the CPU.
-    let metadata: [Float] = [1, 10000, 800, peak]
+    // Four float fields followed by two uint32 fields, matching the CPU metadata.
+    let metadata: [Float] = [1, 10000, 800, peak, Float(bitPattern: flags), Float(bitPattern: 1)]
     metadata.withUnsafeBytes { encoder.setFragmentBytes($0.baseAddress!, length: $0.count, index: 0) }
     encoder.setViewport(MTLViewport(originX: 0, originY: 0, width: Double(pixels.count), height: 1, znear: 0, zfar: 1))
     encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
@@ -111,3 +111,14 @@ near(scaled[8], 2, "scaled present specialization")
 let gamma = try render(colors, peak: 2, gamma: true)
 near(gamma[8], 2, "gamma ramp remains compatible")
 print("PASS: actual Metal present shader: ramps, SDR fallback, sRGB, hue, alpha, scaling and gamma")
+
+let bands = [SIMD4<Float>](repeating: .init(0, 0, 0, 1), count: 5)
+for limit: Float in [1, 1.25, 2] {
+    let pattern = try render(bands, peak: limit, flags: 2)
+    for (i, expected) in [Float(0.18), 1, 1.25, 1.5, 2].enumerated() {
+        near(pattern[i * 4], min(expected, limit), "test pattern band")
+    }
+}
+let bypass = try render(bands, peak: 0, flags: 2)
+near(bypass[8], 0, "pattern cannot replace unsupported/native HDR content")
+print("PASS: actual live comparison and five-band HDR calibration shader")

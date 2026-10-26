@@ -187,6 +187,7 @@ enum BCDSessionCommand: Equatable {
     @Published var menu: BCDSessionMenuModel?
     /// The performance HUD (BCDHUDView.swift); nil while the player has it off.
     @Published var performance: BCDHUDFeed?
+    @Published var hdr: BCDHDRFeed?
     @Published var log: BCDLogFeed?
     /// The session line ("Starting…", "The game was asked to close…").
     @Published var message = ""
@@ -243,6 +244,12 @@ struct BCDSessionLayer: View {
                         .frame(maxWidth: min(520, geo.size.width - 40))
                         .frame(maxWidth: .infinity)
                         .padding(.top, insets.top + 12)
+                        .allowsHitTesting(false)
+                }
+                if hud.starting == nil, let hdr = hud.hdr {
+                    BCDHDRSignalView(feed: hdr)
+                        .frame(maxWidth: 430).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                        .padding(.horizontal, insets.leading + 60).padding(.bottom, insets.bottom + 12)
                         .allowsHitTesting(false)
                 }
                 if hud.starting == nil && hud.showsMenuButton {
