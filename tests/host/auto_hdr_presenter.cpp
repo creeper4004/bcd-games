@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <string>
 #define DXMT_NATIVE 1
@@ -14,6 +15,11 @@
 #define unlikely(x) (x)
 namespace env {
 std::string getEnvVar(const char *key) { const char *v = std::getenv(key); return v ? v : ""; }
+}
+static uint32_t control_flags = 1, control_revision = 1;
+static bool old_backend;
+void MadeiraCtl(madeira_ctl_args *a) {
+  if (a->op == 60 && !old_backend) { a->ret = 0x48445200u | control_flags; a->len = control_revision; }
 }
 static WMTEDRValue headroom{1.0f, 1.0f};
 static uint64_t display_version;
@@ -59,7 +65,7 @@ struct Presenter {
 #include "production_hdr_methods.inc"
 static void near(float a, float b) { assert(std::abs(a - b) < 0.0001); }
 int main() {
-  static_assert(sizeof(DXMTPresentMetadata) == 16);
+  static_assert(sizeof(DXMTPresentMetadata) == 24);
   headroom = {4, 8};
   unsetenv("DXMT_AUTO_HDR");
   Presenter off; off.setup();
@@ -81,6 +87,18 @@ int main() {
   assert(p.layer_.space == WMTColorSpaceHDR_scRGB);
   near(p.synchronizeLayerProperties().metadata.edr_scale, 1); // no 80-nit scRGB darkening
   int builds = p.builds;
+  control_flags = 0; control_revision++;
+  auto sdr = p.synchronizeLayerProperties().metadata;
+  near(sdr.auto_hdr_peak, 1); assert(sdr.auto_hdr_flags == 8 && sdr.auto_hdr_revision == control_revision);
+  assert(p.layer_.props.pixel_format == WMTPixelFormatRGBA16Float && p.layer_.space == WMTColorSpaceHDR_scRGB);
+  assert(p.builds == builds);
+  control_flags = 3;
+  auto pattern = p.synchronizeLayerProperties().metadata;
+  assert(pattern.auto_hdr_flags == 11); near(pattern.auto_hdr_peak, 2);
+  old_backend = true;
+  auto fallback = p.synchronizeLayerProperties().metadata;
+  near(fallback.auto_hdr_peak, 2); assert(fallback.auto_hdr_revision == 0);
+  old_backend = false; control_flags = 1;
   headroom = {1.25, 8};
   near(p.synchronizeLayerProperties().metadata.auto_hdr_peak, 1.25);
   headroom = {1, 1};

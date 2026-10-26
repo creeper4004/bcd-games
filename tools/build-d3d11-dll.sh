@@ -212,6 +212,7 @@ python3 "$R/tools/patch-d3d11-src-small-rings.py" "$OUT/tree/src/dxmt" || {
 # D3D11_AUTO_HDR=1; games still opt in separately through their config.
 if [ "${D3D11_AUTO_HDR:-0}" = "1" ]; then
     python3 "$R/tools/patch-dxmt-auto-hdr.py" --presenter-dir "$OUT/tree/src/dxmt" || fail "Auto HDR patch failed"
+    python3 "$R/tools/patch-dxmt-hdr-live.py" --presenter-dir "$OUT/tree/src/dxmt" || fail "Live HDR patch failed"
     bash "$R/tools/build-auto-hdr-shaders.sh" "$OUT/tree/src/dxmt" "$OUT/tree/gen" || fail "Auto HDR shader failed"
     METAL_NOTE="Auto HDR shader compiled from the patched source (Metal 3.1)"
 fi

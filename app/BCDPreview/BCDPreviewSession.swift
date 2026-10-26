@@ -239,6 +239,8 @@ enum BCDPreviewSessionSamples {
     private var fps = "1", scale = "fit", overlay = true
     var hudSetup = BCDHUDSetup(layout: .strip)
     private var eco = false, padMode = "keys", padAPI = "xinput"
+    private var hdr = BCDHDRReading(enabled: true, measuring: true, prepared: true, valid: true,
+                                    edr: true, linear: true, format: 115, appliedFlags: 9, samples: 2304, above: 184, peak: 1.72, headroom: 2.6)
     private var pointer = "absolute", speed = 2.0, sync = "1"
     /// Round 604's input choices (BCDInputMenu.swift): the look is the app's preferences, the rest is kept here.
     var input = BCDInputProfile(lines: ["touchlook": BCDInputPrefs.shared.lines(BCDTouchLookModel.feature, game: BCDInputPrefs.everyone)])
@@ -298,6 +300,7 @@ enum BCDPreviewSessionSamples {
             } else {
                 out += BCDHUDMenu.sections(hudSetup, screen: .landscape)
             }
+            out.append(BCDHDRMenu.section(hdr))
             out.append(BCDMenuSection(id: "eco", title: "Battery & heat", rows: [
                 BCDMenuRow(id: "eco", title: "Eco mode",
                            detail: "The game's threads run on the efficiency cores: the phone stays cooler, the game runs slower. Handy while a game loads; off again for play.",
@@ -386,6 +389,15 @@ enum BCDPreviewSessionSamples {
     }
 
     func toggle(_ row: String, _ on: Bool) {
+        if row.hasPrefix("hdr.") {
+            switch row {
+            case "hdr.enabled": hdr.enabled = on; hdr.appliedFlags = on ? 9 : 8; hdr.peak = on ? 1.72 : 1; hdr.above = on ? 184 : 0
+            case "hdr.measure": hdr.measuring = on
+            case "hdr.pattern": hdr.pattern = on; hdr.appliedFlags = (hdr.enabled ? 1 : 0) | (on ? 2 : 0) | 8
+            default: break
+            }
+            return
+        }
         if BCDInputMenu.handles(row) { return changeInput(row, on ? "1" : "0") }
         if BCDHUDMenu.owns(row) { hudSetup = BCDHUDMenu.toggle(row, on, hudSetup).setup; return }
         switch row {
