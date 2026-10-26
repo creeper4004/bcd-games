@@ -5,24 +5,30 @@ on:
   workflow_dispatch:
 concurrency:
   group: bcd-dev-ipa
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   ipa:
     if: github.repository == 'creeper/bcd-games'
     runs-on: bcd-macos-arm64
     timeout-minutes: 120
     steps:
-      - name: Verify local Xcode worker
+      - name: Check out the pushed commit
+        uses: https://github.com/actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Build local test IPA
         shell: bash
-        run: |
-          mkdir -p output
-          uname -sm > output/smoke.txt
-          xcodebuild -version >> output/smoke.txt
-          date -u >> output/smoke.txt
-      - name: Store local build artifact
+        run: caffeinate -i python3 tools/build-dev-ipa.py --output "$GITHUB_WORKSPACE/output"
+      - name: Store IPA, manifest and logs on Forgejo
+        if: always()
         uses: https://github.com/actions/upload-artifact@v3
         with:
-          name: bcd-macos-smoke-${{ github.run_number }}
-          path: output/smoke.txt
+          name: bcd-dev-${{ github.sha }}-${{ github.run_number }}
+          path: |
+            output/*.ipa
+            output/*.sha256
+            output/BUILD-INFO.json
+            output/*.log
           retention-days: 7
           if-no-files-found: error
