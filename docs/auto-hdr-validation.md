@@ -1,9 +1,10 @@
 # Auto HDR live comparison and signal validation
 
-This fork is based on BCD 0.1.611 (`169a939c`), with the Auto HDR experiment
-rebased by the operator (`e735b5e9`). Local build 612 adds live comparison and
-measurement. Auto HDR expands an SDR game's highlights; it does not recover
-missing native HDR information.
+The combined local build 615 is based on upstream BCD 0.1.614, including the
+latest recommended settings, with the Auto HDR and custom color-profile changes.
+Auto HDR expands an SDR game's highlights; it does not recover missing native
+HDR information. The native runtime is rebuilt from this source; unchanged
+Windows runtime files come from the checksum-verified official 0.1.614 IPA.
 
 ## On the phone
 

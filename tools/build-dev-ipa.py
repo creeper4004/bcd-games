@@ -96,7 +96,7 @@ def main():
     ipa = Path(config['base_ipa'])
     if sha(ipa) != base['ipa_sha256']:
         raise RuntimeError('Upstream IPA base checksum mismatch')
-    base_dir = root / '.bcd-ci/base611'
+    base_dir = root / '.bcd-ci' / ('base-' + base['release'] + '-' + base['ipa_sha256'][:12])
     if not base_dir.exists():
         base_dir.mkdir(parents=True)
         with zipfile.ZipFile(ipa) as z: z.extractall(base_dir)
